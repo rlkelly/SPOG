@@ -10,50 +10,62 @@ import {IGrief} from "./interfaces/IGrief.sol";
 import "hardhat/console.sol";
 
 abstract contract Grief is ERC20Snapshot, IGrief {
-	using SafeERC20 for IERC20;
-	using Counters for Counters.Counter;
+    using SafeERC20 for IERC20;
+    using Counters for Counters.Counter;
 
-	IERC20 immutable internal TOKEN;
-	IERC20 immutable internal CASH;
-	uint immutable internal TAX;
-	uint immutable internal TIME;
-	uint immutable internal INFLATOR;  // 10000 = 100%
+    IERC20 internal immutable TOKEN;
+    IERC20 internal immutable CASH;
+    uint256 internal immutable TAX;
+    uint256 internal immutable TIME;
+    uint256 internal immutable INFLATOR; // 10000 = 100%
 
-	Counters.Counter internal _voteId;
-	mapping (uint => VoteData) public voteData;
-	uint public latestGriefStartTime;
-	uint public latestGriefId;
+    Counters.Counter internal _voteId;
+    mapping(uint256 => VoteData) public voteData;
+    uint256 public latestGriefStartTime;
+    uint256 public latestGriefId;
 
-	event GriefCreated(uint voteId);
+    event GriefCreated(uint256 voteId);
 
-    constructor(IERC20 _token, IERC20 _cash, uint _tax, uint _time, uint _inflator) {
-		TOKEN = _token;
-		CASH = _cash;
-		TAX = _tax;
-		TIME = _time;
-		INFLATOR = _inflator;
+    constructor(
+        IERC20 _token,
+        IERC20 _cash,
+        uint256 _tax,
+        uint256 _time,
+        uint256 _inflator
+    ) {
+        TOKEN = _token;
+        CASH = _cash;
+        TAX = _tax;
+        TIME = _time;
+        INFLATOR = _inflator;
 
-		// no grief for first period
-		latestGriefStartTime = block.timestamp;
+        // no grief for first period
+        latestGriefStartTime = block.timestamp;
     }
 
-	function grief() external {
-		uint snapshotId = _snapshot();
-		require(latestGriefStartTime < block.timestamp - TIME, "still in grief period");
+    function grief() external {
+        uint256 snapshotId = _snapshot();
+        require(
+            latestGriefStartTime < block.timestamp - TIME,
+            "still in grief period"
+        );
 
-		uint currentVoteId = _voteId.current();
+        uint256 currentVoteId = _voteId.current();
 
-		latestGriefId = currentVoteId;
-		voteData[currentVoteId].snapshotId = snapshotId;
-		voteData[currentVoteId].startTime = block.timestamp;
-		voteData[currentVoteId].isGrief = true;
-		latestGriefStartTime = block.timestamp;
-		voteData[currentVoteId].remainingTokenAmount = totalSupply() * INFLATOR / 10000;
-		voteData[currentVoteId].inflationTotal = voteData[currentVoteId].remainingTokenAmount;
+        latestGriefId = currentVoteId;
+        voteData[currentVoteId].snapshotId = snapshotId;
+        voteData[currentVoteId].startTime = block.timestamp;
+        voteData[currentVoteId].isGrief = true;
+        latestGriefStartTime = block.timestamp;
+        voteData[currentVoteId].remainingTokenAmount =
+            (totalSupply() * INFLATOR) /
+            10000;
+        voteData[currentVoteId].inflationTotal = voteData[currentVoteId]
+            .remainingTokenAmount;
 
-		emit GriefCreated(latestGriefId);
-		_mint(address(this), voteData[currentVoteId].remainingTokenAmount);
+        emit GriefCreated(latestGriefId);
+        _mint(address(this), voteData[currentVoteId].remainingTokenAmount);
 
-		_voteId.increment();
-	}
+        _voteId.increment();
+    }
 }
