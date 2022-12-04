@@ -169,7 +169,7 @@ contract SPOG is Auction, Grief, Buyout, ISPOG {
         );
 
         Invocation memory invocation = voteData[voteId].invocation;
-		// solhint-disable-next-line
+        // solhint-disable-next-line
         (bool _sent, bytes memory _data) = invocation.target.call(
             invocation.callData
         );
@@ -209,22 +209,20 @@ contract SPOG is Auction, Grief, Buyout, ISPOG {
         return TIME;
     }
 
-    function token()
-        public
-        view
-        virtual
-        override(Auction, Buyout)
-        returns (IERC20)
-    {
+    function token() public view override(Auction, Buyout) returns (IERC20) {
         return TOKEN;
     }
 
-    function tax() public view virtual override(Buyout) returns (uint256) {
+    function tax() public view override(Buyout) returns (uint256) {
         return TAX;
     }
 
-    function inflator() public view virtual returns (uint256) {
+    function inflator() public view returns (uint256) {
         return INFLATOR;
+    }
+
+    function cash() public view override returns (IERC20) {
+        return CASH;
     }
 
     function balanceInToken(address user) public view returns (uint256) {

@@ -8,7 +8,7 @@ abstract contract Buyout {
     using SafeERC20 for IERC20;
 
     function buyout() public {
-        token().safeTransferFrom(msg.sender, address(this), tax());
+        cash().safeTransferFrom(msg.sender, address(this), tax());
         // TODO: figure out how to start a runoff
     }
 
@@ -17,4 +17,6 @@ abstract contract Buyout {
     function token() public view virtual returns (IERC20);
 
     function tax() public view virtual returns (uint256);
+
+    function cash() public view virtual returns (IERC20);
 }
